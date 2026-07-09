@@ -25,10 +25,33 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
     opacity: isDragging ? 0.3 : 1,
   };
 
-  const priorityColors = {
+  const priorityBorders = {
+    HIGH: 'border-l-4 border-l-red-500',
+    MEDIUM: 'border-l-4 border-l-amber-500',
+    LOW: 'border-l-4 border-l-emerald-500',
+  };
+
+  const priorityBadges = {
     HIGH: 'bg-red-500/10 text-red-400 border-red-500/20',
     MEDIUM: 'bg-yellow-500/10 text-yellow-400 border-yellow-500/20',
     LOW: 'bg-green-500/10 text-green-400 border-green-500/20',
+  };
+
+  const getAvatarStyle = (name) => {
+    const bgColors = [
+      'bg-blue-600/25 text-blue-300 border-blue-500/30',
+      'bg-purple-600/25 text-purple-300 border-purple-500/30',
+      'bg-emerald-600/25 text-emerald-300 border-emerald-500/30',
+      'bg-amber-600/25 text-amber-300 border-amber-500/30',
+      'bg-rose-600/25 text-rose-300 border-rose-500/30',
+      'bg-indigo-600/25 text-indigo-300 border-indigo-500/30',
+    ];
+    let hash = 0;
+    for (let i = 0; i < name.length; i++) {
+      hash = name.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const index = Math.abs(hash) % bgColors.length;
+    return bgColors[index];
   };
 
   return (
@@ -37,7 +60,7 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className="bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 p-3.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group relative select-none"
+      className={`bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 p-3.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group relative select-none ${priorityBorders[task.priority] || priorityBorders.MEDIUM}`}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
         <h4 className="text-sm font-semibold text-slate-200 group-hover:text-purple-400 transition-colors line-clamp-2 pr-6">
@@ -72,13 +95,13 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
       <p className="text-xs text-slate-500 line-clamp-2 mb-4 leading-relaxed">{task.description || 'Không có mô tả'}</p>
       
       <div className="flex items-center justify-between">
-        <span className={`text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded border ${priorityColors[task.priority] || priorityColors.MEDIUM}`}>
+        <span className={`text-[10px] font-extrabold tracking-wider uppercase px-2 py-0.5 rounded border ${priorityBadges[task.priority] || priorityBadges.MEDIUM}`}>
           {task.priority}
         </span>
         
         {task.assignedUserName && (
           <div
-            className="h-5 w-5 rounded-full bg-slate-800 border border-slate-700 text-[10px] font-bold text-slate-400 flex items-center justify-center uppercase"
+            className={`h-5 w-5 rounded-full border text-[10px] font-extrabold flex items-center justify-center uppercase shadow-sm ${getAvatarStyle(task.assignedUserName)}`}
             title={`Được giao cho: ${task.assignedUserName}`}
           >
             {task.assignedUserName.charAt(0)}
