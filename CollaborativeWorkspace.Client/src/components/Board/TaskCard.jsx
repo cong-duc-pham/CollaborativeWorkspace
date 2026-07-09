@@ -3,7 +3,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { Trash2, Edit2 } from 'lucide-react';
 
-const TaskCard = ({ task, onDelete, onEdit }) => {
+const TaskCard = ({ task, disabled, onDelete, onEdit }) => {
   const {
     attributes,
     listeners,
@@ -13,6 +13,7 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
     isDragging,
   } = useSortable({ 
     id: task.id.toString(), 
+    disabled,
     data: { 
       type: 'Task', 
       task 
@@ -62,7 +63,7 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
       className={`border p-3.5 rounded-xl shadow-sm transition-all select-none touch-none group relative
         ${isDragging
           ? 'bg-slate-950 border-dashed border-slate-700 opacity-40 cursor-grabbing shadow-none'
-          : `bg-slate-900 border-slate-800/80 hover:border-slate-700/80 hover:shadow-md cursor-grab active:cursor-grabbing ${priorityBorders[task.priority] || priorityBorders.MEDIUM}`
+          : `bg-slate-900 border-slate-800/80 hover:border-slate-700/80 hover:shadow-md ${disabled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} ${priorityBorders[task.priority] || priorityBorders.MEDIUM}`
         }`}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
