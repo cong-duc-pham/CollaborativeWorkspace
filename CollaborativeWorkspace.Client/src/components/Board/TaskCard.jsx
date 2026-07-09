@@ -60,7 +60,7 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 p-3.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group relative select-none ${priorityBorders[task.priority] || priorityBorders.MEDIUM}`}
+      className={`bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 p-3.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group relative select-none touch-none ${priorityBorders[task.priority] || priorityBorders.MEDIUM}`}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
         <h4 className="text-sm font-semibold text-slate-200 group-hover:text-purple-400 transition-colors line-clamp-2 pr-6">

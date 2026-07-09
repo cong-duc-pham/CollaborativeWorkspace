@@ -4,7 +4,8 @@ import api, { SIGNALR_URL } from '../services/api';
 import { HubConnectionBuilder } from '@microsoft/signalr';
 import { 
   DndContext, 
-  PointerSensor, 
+  MouseSensor,
+  TouchSensor, 
   useSensor, 
   useSensors, 
   DragOverlay 
@@ -72,9 +73,15 @@ const Dashboard = () => {
 
   // DnD sensors
   const sensors = useSensors(
-    useSensor(PointerSensor, {
+    useSensor(MouseSensor, {
       activationConstraint: {
         distance: 8,
+      },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: {
+        delay: 250,
+        tolerance: 5,
       },
     })
   );
