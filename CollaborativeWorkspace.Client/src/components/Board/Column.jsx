@@ -40,6 +40,7 @@ const Column = ({ column, tasks, onAddTask, onDeleteColumn, onDeleteTask, onEdit
             <TaskCard
               key={task.id}
               task={task}
+              disabled={!canEdit}
               onDelete={canEdit ? onDeleteTask : null}
               onEdit={canEdit ? onEditTask : null}
             />
