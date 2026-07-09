@@ -224,6 +224,73 @@ namespace CollaborativeWorkspace.Backend.Controllers
             return Ok(new { message = "Đã xóa thành viên khỏi dự án thành công." });
         }
 
+        // 7. Update project details (requires ADMIN or MEMBER access)
+        [HttpPut("{id}")]
+        [ProjectAuthorize("MEMBER")]
+        public async Task<IActionResult> Update(int id, [FromBody] UpdateProjectRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var project = await _context.Projects.FindAsync(id);
+            if (project == null)
+                return NotFound(new { message = "Không tìm thấy dự án." });
+
+            project.Name = request.Name.Trim();
+            project.Description = request.Description?.Trim() ?? string.Empty;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Cập nhật dự án thành công.", name = project.Name, description = project.Description });
+        }
+
+        // 8. Delete project (requires ADMIN access)
+        [HttpDelete("{id}")]
+        [ProjectAuthorize("ADMIN")]
+        public async Task<IActionResult> Delete(int id)
+        {
+            var project = await _context.Projects.FindAsync(id);
+            if (project == null)
+                return NotFound(new { message = "Không tìm thấy dự án." });
+
+            _context.Projects.Remove(project);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Xóa dự án thành công." });
+        }
+
+        // 9. Update member role (requires ADMIN access)
+        [HttpPut("{projectId}/members/{userId}")]
+        [ProjectAuthorize("ADMIN")]
+        public async Task<IActionResult> UpdateMemberRole(int projectId, int userId, [FromBody] UpdateMemberRoleRequest request)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
+
+            var member = await _context.ProjectMembers
+                .FirstOrDefaultAsync(pm => pm.ProjectId == projectId && pm.UserId == userId);
+
+            if (member == null)
+                return NotFound(new { message = "Thành viên này không tồn tại trong dự án." });
+
+            // If updating an ADMIN, verify we are not removing the last ADMIN
+            if (member.Role == "ADMIN" && request.Role.ToUpper() != "ADMIN")
+            {
+                int adminCount = await _context.ProjectMembers
+                    .CountAsync(pm => pm.ProjectId == projectId && pm.Role == "ADMIN");
+
+                if (adminCount <= 1)
+                {
+                    return BadRequest(new { message = "Không thể thay đổi vai trò của Admin duy nhất." });
+                }
+            }
+
+            member.Role = request.Role.ToUpper();
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Cập nhật vai trò thành viên thành công." });
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier);

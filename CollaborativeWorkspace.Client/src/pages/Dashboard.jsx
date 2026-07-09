@@ -23,11 +23,30 @@ import {
   Loader2, 
   Trash2,
   ClipboardList,
-  X
+  X,
+  Settings,
+  Sun,
+  Moon
 } from 'lucide-react';
 
 const Dashboard = () => {
   const { user, logout } = useAuth();
+  
+  // Theme state
+  const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+
+  useEffect(() => {
+    if (theme === 'dark') {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => prev === 'dark' ? 'light' : 'dark');
+  };
   
   // Projects state
   const [projects, setProjects] = useState([]);
@@ -72,6 +91,15 @@ const Dashboard = () => {
   const [memberRole, setMemberRole] = useState('MEMBER');
   const [memberModalError, setMemberModalError] = useState('');
   const [addingMember, setAddingMember] = useState(false);
+
+  // Project settings modal state
+  const [showSettingsModal, setShowSettingsModal] = useState(false);
+  const [settingsProjectName, setSettingsProjectName] = useState('');
+  const [settingsProjectDesc, setSettingsProjectDesc] = useState('');
+  const [settingsModalError, setSettingsModalError] = useState('');
+  const [savingSettings, setSavingSettings] = useState(false);
+  const [deletingProject, setDeletingProject] = useState(false);
+  const [settingsActiveTab, setSettingsActiveTab] = useState('general');
 
   // DnD sensors
   const sensors = useSensors(
@@ -200,8 +228,17 @@ const Dashboard = () => {
     try {
       const response = await api.get('/project');
       setProjects(response.data);
-      if (response.data.length > 0 && !activeProject) {
-        setActiveProject(response.data[0]);
+      if (response.data.length > 0) {
+        const storedActiveId = localStorage.getItem('activeProjectId');
+        let selectedProject = response.data[0];
+        if (storedActiveId) {
+          const found = response.data.find(p => p.id.toString() === storedActiveId);
+          if (found) {
+            selectedProject = found;
+          }
+        }
+        setActiveProject(selectedProject);
+        localStorage.setItem('activeProjectId', selectedProject.id.toString());
       }
     } catch (err) {
       console.error('Lỗi tải danh sách dự án:', err);
@@ -249,6 +286,7 @@ const Dashboard = () => {
       });
       setProjects([response.data, ...projects]);
       setActiveProject(response.data);
+      localStorage.setItem('activeProjectId', response.data.id.toString());
       
       setProjectName('');
       setProjectDesc('');
@@ -257,6 +295,93 @@ const Dashboard = () => {
       setProjectModalError(err.response?.data?.message || 'Không thể tạo dự án.');
     } finally {
       setCreatingProject(false);
+    }
+  };
+
+  // --- Project Settings Handlers ---
+  const handleOpenSettingsModal = () => {
+    if (!activeProject) return;
+    setSettingsProjectName(activeProject.name);
+    setSettingsProjectDesc(activeProject.description || '');
+    setSettingsModalError('');
+    setSettingsActiveTab('general');
+    setShowSettingsModal(true);
+  };
+
+  const handleSaveSettings = async (e) => {
+    e.preventDefault();
+    if (!settingsProjectName.trim()) {
+      setSettingsModalError('Tên dự án là bắt buộc.');
+      return;
+    }
+
+    setSettingsModalError('');
+    setSavingSettings(true);
+
+    try {
+      const response = await api.put(`/project/${activeProject.id}`, {
+        name: settingsProjectName.trim(),
+        description: settingsProjectDesc.trim(),
+      });
+      const updatedActive = { 
+        ...activeProject, 
+        name: response.data.name, 
+        description: response.data.description 
+      };
+      setActiveProject(updatedActive);
+      setProjects(projects.map(p => p.id === activeProject.id ? { ...p, name: response.data.name, description: response.data.description } : p));
+      setShowSettingsModal(false);
+    } catch (err) {
+      setSettingsModalError(err.response?.data?.message || 'Không thể lưu cài đặt.');
+    } finally {
+      setSavingSettings(false);
+    }
+  };
+
+  const handleDeleteProject = async () => {
+    const isConfirmed = window.confirm(
+      'Bạn có chắc chắn muốn xóa dự án này?\nHành động này không thể hoàn tác và sẽ xóa toàn bộ cột/thẻ công việc liên quan.'
+    );
+    if (!isConfirmed) return;
+
+    setDeletingProject(true);
+    try {
+      await api.delete(`/project/${activeProject.id}`);
+      
+      const updatedProjects = projects.filter(p => p.id !== activeProject.id);
+      setProjects(updatedProjects);
+      
+      if (updatedProjects.length > 0) {
+        setActiveProject(updatedProjects[0]);
+        localStorage.setItem('activeProjectId', updatedProjects[0].id.toString());
+      } else {
+        setActiveProject(null);
+        localStorage.removeItem('activeProjectId');
+      }
+      setShowSettingsModal(false);
+    } catch (err) {
+      alert(err.response?.data?.message || 'Không thể xóa dự án.');
+    } finally {
+      setDeletingProject(false);
+    }
+  };
+
+  const handleUpdateMemberRole = async (userId, newRole) => {
+    try {
+      await api.put(`/project/${activeProject.id}/members/${userId}`, { role: newRole });
+      setMembers(members.map(m => m.userId === userId ? { ...m, role: newRole } : m));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Không thể cập nhật vai trò thành viên.');
+    }
+  };
+
+  const handleRemoveMember = async (userId) => {
+    if (!window.confirm('Bạn có chắc chắn muốn xóa thành viên này khỏi dự án?')) return;
+    try {
+      await api.delete(`/project/${activeProject.id}/members/${userId}`);
+      setMembers(members.filter(m => m.userId !== userId));
+    } catch (err) {
+      alert(err.response?.data?.message || 'Không thể xóa thành viên.');
     }
   };
 
@@ -285,16 +410,6 @@ const Dashboard = () => {
       setMemberModalError(err.response?.data?.message || 'Không thể thêm thành viên.');
     } finally {
       setAddingMember(false);
-    }
-  };
-
-  const handleRemoveMember = async (userId) => {
-    if (!window.confirm('Bạn có chắc chắn muốn xóa thành viên này khỏi dự án?')) return;
-    try {
-      await api.delete(`/project/${activeProject.id}/members/${userId}`);
-      setMembers(members.filter(m => m.userId !== userId));
-    } catch (err) {
-      alert(err.response?.data?.message || 'Lỗi khi xóa thành viên.');
     }
   };
 
@@ -508,11 +623,11 @@ const Dashboard = () => {
   const isViewer = activeProject?.userRole === 'VIEWER';
 
   return (
-    <div className="flex h-screen w-screen overflow-hidden bg-slate-950 text-slate-100">
+    <div className="flex h-screen w-screen overflow-hidden bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors duration-200">
       {/* 1. Sidebar */}
-      <aside className="w-64 border-r border-slate-900 bg-slate-950 flex flex-col z-20">
+      <aside className="w-64 border-r border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-950 flex flex-col z-20 transition-colors duration-200">
         {/* Sidebar Header */}
-        <div className="h-16 border-b border-slate-900 flex items-center px-6 gap-3">
+        <div className="h-16 border-b border-slate-200 dark:border-slate-900 flex items-center px-6 gap-3 transition-colors duration-200">
           <div className="h-8 w-8 rounded-lg bg-gradient-to-tr from-purple-600 to-indigo-600 flex items-center justify-center shadow-md shadow-purple-500/20">
             <LayoutDashboard className="h-4 w-4 text-white" />
           </div>
@@ -545,16 +660,19 @@ const Dashboard = () => {
                 {projects.map((proj) => (
                   <button
                     key={proj.id}
-                    onClick={() => setActiveProject(proj)}
+                    onClick={() => {
+                      setActiveProject(proj);
+                      localStorage.setItem('activeProjectId', proj.id.toString());
+                    }}
                     className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 text-left ${
                       activeProject?.id === proj.id
-                        ? 'bg-purple-600/10 text-purple-400 border border-purple-500/20'
-                        : 'text-slate-400 hover:bg-slate-900/50 hover:text-slate-200 border border-transparent'
+                        ? 'bg-purple-50 dark:bg-purple-600/10 text-purple-600 dark:text-purple-400 border border-purple-200 dark:border-purple-500/20'
+                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-900/50 hover:text-slate-900 dark:hover:text-slate-200 border border-transparent'
                     }`}
                   >
                     <Folder className="h-4 w-4 shrink-0" />
                     <span className="truncate flex-1">{proj.name}</span>
-                    <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-900 border border-slate-800 text-slate-500 shrink-0">
+                    <span className="text-[10px] uppercase font-bold tracking-wider px-1.5 py-0.5 rounded bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-500 dark:text-slate-400 shrink-0">
                       {proj.userRole}
                     </span>
                   </button>
@@ -565,20 +683,20 @@ const Dashboard = () => {
         </div>
 
         {/* Sidebar Footer / User Info */}
-        <div className="p-4 border-t border-slate-900 bg-slate-950/40">
+        <div className="p-4 border-t border-slate-200 dark:border-slate-900 bg-slate-50/50 dark:bg-slate-950/40">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3 overflow-hidden">
-              <div className="h-9 w-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-purple-400 font-semibold uppercase">
+              <div className="h-9 w-9 rounded-full bg-slate-100 dark:bg-slate-900 border border-slate-200 dark:border-slate-800 flex items-center justify-center text-purple-600 dark:text-purple-400 font-semibold uppercase">
                 {user?.fullName.charAt(0)}
               </div>
               <div className="overflow-hidden">
-                <h4 className="text-sm font-semibold truncate text-slate-200">{user?.fullName}</h4>
+                <h4 className="text-sm font-semibold truncate text-slate-800 dark:text-slate-200">{user?.fullName}</h4>
                 <p className="text-[11px] text-slate-500 truncate">{user?.email}</p>
               </div>
             </div>
             <button 
               onClick={logout}
-              className="p-2 hover:bg-red-500/10 hover:text-red-400 text-slate-500 rounded-lg transition-all"
+              className="p-2 hover:bg-red-500/10 hover:text-red-400 text-slate-400 dark:text-slate-500 rounded-lg transition-all"
               title="Đăng xuất"
             >
               <LogOut className="h-4 w-4" />
@@ -588,13 +706,13 @@ const Dashboard = () => {
       </aside>
 
       {/* 2. Main Space */}
-      <main className="flex-1 flex flex-col overflow-hidden bg-slate-950">
+      <main className="flex-1 flex flex-col overflow-hidden bg-slate-50 dark:bg-slate-950 transition-colors duration-200">
         {activeProject ? (
           <>
             {/* Main Header */}
-            <header className="h-16 border-b border-slate-900 bg-slate-950/30 flex items-center justify-between px-8">
+            <header className="h-16 border-b border-slate-200 dark:border-slate-900 bg-white dark:bg-slate-950/30 flex items-center justify-between px-8 transition-colors duration-200">
               <div className="overflow-hidden mr-4">
-                <h1 className="text-xl font-bold text-white truncate">{activeProject.name}</h1>
+                <h1 className="text-xl font-bold text-slate-800 dark:text-white truncate">{activeProject.name}</h1>
                 <p className="text-xs text-slate-500 truncate max-w-xl">{activeProject.description || 'Không có mô tả dự án'}</p>
               </div>
               
@@ -627,6 +745,23 @@ const Dashboard = () => {
                     Mời thành viên
                   </button>
                 )}
+                {/* Project settings button */}
+                <button
+                  onClick={handleOpenSettingsModal}
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-slate-200 transition-all active:scale-95 shadow-sm"
+                  title="Cài đặt dự án"
+                >
+                  <Settings className="h-4 w-4" />
+                </button>
+
+                {/* Theme toggle button */}
+                <button
+                  onClick={toggleTheme}
+                  className="p-1.5 rounded-lg border border-slate-200 dark:border-slate-800 bg-white hover:bg-slate-50 dark:bg-slate-900/50 dark:hover:bg-slate-800 text-slate-500 dark:text-slate-400 hover:text-slate-950 dark:hover:text-slate-200 transition-all active:scale-95 shadow-sm"
+                  title={theme === 'dark' ? "Chuyển sang Giao diện Sáng" : "Chuyển sang Giao diện Tối"}
+                >
+                  {theme === 'dark' ? <Sun className="h-4 w-4" /> : <Moon className="h-4 w-4" />}
+                </button>
               </div>
             </header>
 
@@ -968,6 +1103,194 @@ const Dashboard = () => {
                 </button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* 3.4. Project Settings Modal */}
+      {showSettingsModal && activeProject && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="w-full max-w-2xl rounded-2xl border border-slate-800 bg-slate-900 shadow-2xl overflow-hidden flex flex-col h-[550px]">
+            {/* Modal Header */}
+            <div className="flex items-center justify-between px-6 py-4 border-b border-slate-800">
+              <div>
+                <h3 className="text-lg font-bold text-white">Cài đặt dự án</h3>
+                <p className="text-xs text-slate-500">{activeProject.name}</p>
+              </div>
+              <button 
+                onClick={() => setShowSettingsModal(false)}
+                className="text-slate-500 hover:text-white"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            {/* Modal Tabs */}
+            <div className="flex border-b border-slate-850 px-6 bg-slate-950/20 shrink-0">
+              <button
+                onClick={() => setSettingsActiveTab('general')}
+                className={`py-3 px-4 text-sm font-medium border-b-2 transition-all ${
+                  settingsActiveTab === 'general'
+                    ? 'border-purple-500 text-purple-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Thông tin chung
+              </button>
+              <button
+                onClick={() => setSettingsActiveTab('members')}
+                className={`py-3 px-4 text-sm font-medium border-b-2 transition-all ${
+                  settingsActiveTab === 'members'
+                    ? 'border-purple-500 text-purple-400'
+                    : 'border-transparent text-slate-400 hover:text-slate-200'
+                }`}
+              >
+                Thành viên ({members.length})
+              </button>
+            </div>
+
+            {/* Modal Content */}
+            <div className="flex-1 overflow-y-auto p-6">
+              {settingsActiveTab === 'general' ? (
+                <form onSubmit={handleSaveSettings} className="space-y-6 h-full flex flex-col justify-between">
+                  <div className="space-y-4">
+                    {settingsModalError && (
+                      <div className="rounded-lg bg-red-500/10 border border-red-500/20 p-3 text-xs text-red-400">
+                        {settingsModalError}
+                      </div>
+                    )}
+                    
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Tên dự án</label>
+                      <input 
+                        type="text" 
+                        required
+                        disabled={activeProject.userRole === 'VIEWER'}
+                        value={settingsProjectName}
+                        onChange={(e) => setSettingsProjectName(e.target.value)}
+                        placeholder="Tên dự án của bạn..." 
+                        className="w-full rounded-lg border border-slate-800 bg-slate-950 py-2.5 px-3 text-slate-200 placeholder-slate-600 text-sm outline-none focus:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">Mô tả dự án</label>
+                      <textarea 
+                        disabled={activeProject.userRole === 'VIEWER'}
+                        value={settingsProjectDesc}
+                        onChange={(e) => setSettingsProjectDesc(e.target.value)}
+                        placeholder="Mô tả tóm tắt về dự án..." 
+                        rows="5"
+                        className="w-full rounded-lg border border-slate-800 bg-slate-950 py-2.5 px-3 text-slate-200 placeholder-slate-600 text-sm outline-none focus:border-purple-500 transition-colors resize-none disabled:opacity-50 disabled:cursor-not-allowed"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="border-t border-slate-850 pt-6 mt-6 flex flex-col gap-4">
+                    {/* General Save Actions */}
+                    {activeProject.userRole !== 'VIEWER' && (
+                      <div className="flex items-center justify-end gap-3">
+                        <button 
+                          type="button"
+                          onClick={() => setShowSettingsModal(false)}
+                          className="px-4 py-2 border border-slate-800 bg-transparent text-slate-400 hover:text-white rounded-lg text-sm font-medium transition-colors"
+                        >
+                          Hủy
+                        </button>
+                        <button 
+                          type="submit"
+                          disabled={savingSettings}
+                          className="flex items-center gap-2 px-5 py-2 bg-purple-600 hover:bg-purple-500 text-white rounded-lg text-sm font-semibold shadow-lg shadow-purple-600/10 active:scale-95 transition-all disabled:opacity-50"
+                        >
+                          {savingSettings && <Loader2 className="h-4 w-4 animate-spin" />}
+                          Lưu cài đặt
+                        </button>
+                      </div>
+                    )}
+
+                    {/* Danger Zone */}
+                    {activeProject.userRole === 'ADMIN' && (
+                      <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-2">
+                        <div>
+                          <h4 className="text-sm font-semibold text-red-400">Vùng nguy hiểm (Danger Zone)</h4>
+                          <p className="text-xs text-slate-500">Xóa vĩnh viễn dự án này và tất cả các tài nguyên liên quan.</p>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={handleDeleteProject}
+                          disabled={deletingProject}
+                          className="flex items-center justify-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded-lg text-xs font-bold shadow-lg shadow-red-600/10 active:scale-95 transition-all shrink-0 disabled:opacity-50"
+                        >
+                          {deletingProject && <Loader2 className="h-3 w-3 animate-spin" />}
+                          Xóa dự án
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </form>
+              ) : (
+                <div className="space-y-4">
+                  <div className="flex justify-between items-center">
+                    <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Danh sách thành viên hiện tại</h4>
+                    {activeProject.userRole === 'ADMIN' && (
+                      <button
+                        onClick={() => {
+                          setShowSettingsModal(false);
+                          setShowMemberModal(true);
+                        }}
+                        className="text-xs text-purple-400 hover:text-purple-300 font-semibold transition-colors"
+                      >
+                        + Mời thành viên mới
+                      </button>
+                    )}
+                  </div>
+
+                  <div className="space-y-2 max-h-[300px] overflow-y-auto pr-1">
+                    {members.map((member) => (
+                      <div key={member.userId} className="flex items-center justify-between p-3 rounded-xl bg-slate-950/40 border border-slate-850 hover:border-slate-800 transition-all">
+                        <div className="flex items-center gap-3 overflow-hidden">
+                          <div className="h-9 w-9 rounded-full bg-slate-900 border border-slate-800 flex items-center justify-center text-sm font-bold text-purple-400 uppercase shrink-0">
+                            {member.fullName.charAt(0)}
+                          </div>
+                          <div className="overflow-hidden">
+                            <h5 className="text-sm font-semibold text-slate-200 truncate">{member.fullName}</h5>
+                            <p className="text-xs text-slate-500 truncate">{member.email}</p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-3 shrink-0">
+                          {activeProject.userRole === 'ADMIN' && member.userId !== user.id ? (
+                            <select
+                              value={member.role}
+                              onChange={(e) => handleUpdateMemberRole(member.userId, e.target.value)}
+                              className="rounded-lg border border-slate-800 bg-slate-950 py-1.5 px-2 text-slate-300 text-xs outline-none focus:border-purple-500 transition-colors"
+                            >
+                              <option value="VIEWER">VIEWER</option>
+                              <option value="MEMBER">MEMBER</option>
+                              <option value="ADMIN">ADMIN</option>
+                            </select>
+                          ) : (
+                            <span className="text-[10px] uppercase font-bold tracking-wider px-2.5 py-1 rounded bg-slate-900 border border-slate-800 text-slate-400">
+                              {member.role}
+                            </span>
+                          )}
+
+                          {activeProject.userRole === 'ADMIN' && member.userId !== user.id && (
+                            <button 
+                              onClick={() => handleRemoveMember(member.userId)}
+                              className="p-1.5 text-slate-500 hover:text-red-400 hover:bg-red-500/10 rounded-lg transition-all"
+                              title="Xóa khỏi dự án"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
       )}

@@ -10,12 +10,12 @@ const Column = ({ column, tasks, onAddTask, onDeleteColumn, onDeleteTask, onEdit
   });
 
   return (
-    <div className="w-72 shrink-0 flex flex-col max-h-full rounded-xl bg-slate-900/40 border border-slate-900 p-4">
+    <div className="w-72 shrink-0 flex flex-col max-h-full rounded-xl bg-slate-100/60 dark:bg-slate-900/40 border border-slate-200 dark:border-slate-900 p-4 transition-colors duration-200">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2 overflow-hidden">
-          <span className="font-semibold text-slate-200 text-sm tracking-wide truncate">{column.name}</span>
-          <span className="text-[10px] px-1.5 py-0.5 bg-slate-900 text-slate-500 rounded border border-slate-800/80 font-bold shrink-0">
+          <span className="font-semibold text-slate-700 dark:text-slate-200 text-sm tracking-wide truncate">{column.name}</span>
+          <span className="text-[10px] px-1.5 py-0.5 bg-slate-200 dark:bg-slate-900 text-slate-500 dark:text-slate-400 rounded border border-slate-300 dark:border-slate-800/80 font-bold shrink-0">
             {tasks.length}
           </span>
         </div>
@@ -47,7 +47,7 @@ const Column = ({ column, tasks, onAddTask, onDeleteColumn, onDeleteTask, onEdit
           ))}
         </SortableContext>
         {tasks.length === 0 && (
-          <div className="h-24 border border-dashed border-slate-900/80 rounded-xl flex items-center justify-center text-xs text-slate-600 italic">
+          <div className="h-24 border border-dashed border-slate-300 dark:border-slate-800/80 rounded-xl flex items-center justify-center text-xs text-slate-400 dark:text-slate-600 italic">
             Kéo thả thẻ vào đây
           </div>
         )}
@@ -57,7 +57,7 @@ const Column = ({ column, tasks, onAddTask, onDeleteColumn, onDeleteTask, onEdit
       {canEdit && (
         <button
           onClick={() => onAddTask(column.id)}
-          className="w-full py-2 border border-slate-900 hover:border-slate-800 hover:bg-slate-900/20 rounded-lg flex items-center justify-center gap-2 text-slate-500 hover:text-slate-400 text-xs font-semibold transition-all group"
+          className="w-full py-2 border border-slate-250 dark:border-slate-900 hover:border-slate-300 dark:hover:border-slate-800 hover:bg-slate-50 dark:hover:bg-slate-900/20 rounded-lg flex items-center justify-center gap-2 text-slate-500 hover:text-slate-950 dark:hover:text-slate-400 text-xs font-semibold transition-all group"
         >
           <Plus className="h-3.5 w-3.5 group-hover:scale-110 transition-transform" />
           Thêm công việc
