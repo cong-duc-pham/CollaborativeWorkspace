@@ -37,10 +37,10 @@ namespace CollaborativeWorkspace.Backend.DTOs
 
     public class MoveTaskRequest
     {
-        [Required(ErrorMessage = "Cột đích là bắt buộc.")]
+        [Range(1, int.MaxValue, ErrorMessage = "Cột đích không hợp lệ.")]
         public int TargetColumnId { get; set; }
 
-        [Required(ErrorMessage = "Vị trí đích là bắt buộc.")]
+        [Range(0, int.MaxValue, ErrorMessage = "Vị trí đích không hợp lệ.")]
         public int TargetPosition { get; set; }
 
         public string? ConnectionId { get; set; }

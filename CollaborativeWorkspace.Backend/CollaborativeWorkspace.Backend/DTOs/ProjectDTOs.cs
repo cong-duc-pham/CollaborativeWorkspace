@@ -41,4 +41,21 @@ namespace CollaborativeWorkspace.Backend.DTOs
         public string Role { get; set; } = string.Empty;
         public DateTime JoinedAt { get; set; }
     }
+
+    public class UpdateProjectRequest
+    {
+        [Required(ErrorMessage = "Tên dự án là bắt buộc.")]
+        [MaxLength(200, ErrorMessage = "Tên dự án không được vượt quá 200 ký tự.")]
+        public string Name { get; set; } = string.Empty;
+
+        [MaxLength(1000, ErrorMessage = "Mô tả không được vượt quá 1000 ký tự.")]
+        public string Description { get; set; } = string.Empty;
+    }
+
+    public class UpdateMemberRoleRequest
+    {
+        [Required(ErrorMessage = "Vai trò là bắt buộc.")]
+        [RegularExpression("^(ADMIN|MEMBER|VIEWER)$", ErrorMessage = "Vai trò phải là ADMIN, MEMBER hoặc VIEWER.")]
+        public string Role { get; set; } = "MEMBER";
+    }
 }

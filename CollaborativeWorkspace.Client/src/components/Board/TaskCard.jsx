@@ -62,22 +62,22 @@ const TaskCard = ({ task, disabled, onDelete, onEdit }) => {
       {...listeners}
       className={`border p-3.5 rounded-xl shadow-sm transition-all select-none touch-none group relative
         ${isDragging
-          ? 'bg-slate-950 border-dashed border-slate-700 opacity-40 cursor-grabbing shadow-none'
-          : `bg-slate-900 border-slate-800/80 hover:border-slate-700/80 hover:shadow-md ${disabled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} ${priorityBorders[task.priority] || priorityBorders.MEDIUM}`
+          ? 'bg-slate-100 dark:bg-slate-950 border-dashed border-slate-350 dark:border-slate-700 opacity-40 cursor-grabbing shadow-none'
+          : `bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800/80 hover:border-slate-350 dark:hover:border-slate-700/80 hover:shadow-md ${disabled ? 'cursor-default' : 'cursor-grab active:cursor-grabbing'} ${priorityBorders[task.priority] || priorityBorders.MEDIUM}`
         }`}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
-        <h4 className="text-sm font-semibold text-slate-200 group-hover:text-purple-400 transition-colors line-clamp-2 pr-6">
+        <h4 className="text-sm font-semibold text-slate-850 dark:text-slate-200 group-hover:text-purple-600 dark:group-hover:text-purple-400 transition-colors line-clamp-2 pr-6">
           {task.title}
         </h4>
-        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-2 bg-slate-900 pl-2">
+        <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity absolute right-2 top-2 bg-white dark:bg-slate-900 pl-2">
           {onEdit && (
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 onEdit(task);
               }}
-              className="p-1 hover:bg-slate-800 rounded text-slate-400 hover:text-white"
+              className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded text-slate-500 hover:text-slate-850 dark:text-slate-400 dark:hover:text-white transition-colors"
             >
               <Edit2 className="h-3 w-3" />
             </button>
