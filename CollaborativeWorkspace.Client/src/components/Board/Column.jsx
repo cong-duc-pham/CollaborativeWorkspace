@@ -1,9 +1,14 @@
 import React from 'react';
 import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable';
+import { useDroppable } from '@dnd-kit/core';
 import { Plus, Trash2 } from 'lucide-react';
 import TaskCard from './TaskCard';
 
 const Column = ({ column, tasks, onAddTask, onDeleteColumn, onDeleteTask, onEditTask, canEdit }) => {
+  const { setNodeRef: setDroppableRef } = useDroppable({
+    id: column.id.toString(),
+  });
+
   return (
     <div className="w-72 shrink-0 flex flex-col max-h-full rounded-xl bg-slate-900/40 border border-slate-900 p-4">
       {/* Header */}
@@ -25,9 +30,12 @@ const Column = ({ column, tasks, onAddTask, onDeleteColumn, onDeleteTask, onEdit
         )}
       </div>
 
-      {/* Sortable Tasks Container */}
-      <div className="flex-1 overflow-y-auto space-y-3 pr-1 mb-4 min-h-[150px]">
-        <SortableContext items={tasks.map(t => t.id)} strategy={verticalListSortingStrategy}>
+      {/* Sortable & Droppable Tasks Container */}
+      <div 
+        ref={setDroppableRef}
+        className="flex-1 overflow-y-auto overflow-x-hidden space-y-3 pr-1 mb-4 min-h-[150px]"
+      >
+        <SortableContext items={tasks.map(t => t.id.toString())} strategy={verticalListSortingStrategy}>
           {tasks.map((task) => (
             <TaskCard
               key={task.id}

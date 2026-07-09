@@ -12,7 +12,7 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
     transition,
     isDragging,
   } = useSortable({ 
-    id: task.id, 
+    id: task.id.toString(), 
     data: { 
       type: 'Task', 
       task 
@@ -22,7 +22,6 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
-    opacity: isDragging ? 0.3 : 1,
   };
 
   const priorityBorders = {
@@ -60,7 +59,11 @@ const TaskCard = ({ task, onDelete, onEdit }) => {
       style={style}
       {...attributes}
       {...listeners}
-      className={`bg-slate-900 border border-slate-800/80 hover:border-slate-700/80 p-3.5 rounded-xl shadow-sm hover:shadow-md transition-all cursor-grab active:cursor-grabbing group relative select-none touch-none ${priorityBorders[task.priority] || priorityBorders.MEDIUM}`}
+      className={`border p-3.5 rounded-xl shadow-sm transition-all select-none touch-none group relative
+        ${isDragging
+          ? 'bg-slate-950 border-dashed border-slate-700 opacity-40 cursor-grabbing shadow-none'
+          : `bg-slate-900 border-slate-800/80 hover:border-slate-700/80 hover:shadow-md cursor-grab active:cursor-grabbing ${priorityBorders[task.priority] || priorityBorders.MEDIUM}`
+        }`}
     >
       <div className="flex items-start justify-between gap-2 mb-1">
         <h4 className="text-sm font-semibold text-slate-200 group-hover:text-purple-400 transition-colors line-clamp-2 pr-6">
