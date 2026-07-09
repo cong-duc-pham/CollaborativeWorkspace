@@ -13,3 +13,27 @@ body,
   color: #f1f5f9; /* Slate 100 */
   font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
+
+/* Global dark scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #334155 transparent; /* slate-700 thumb, transparent track */
+}
+
+*::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #334155; /* slate-700 */
+  border-radius: 9999px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #475569; /* slate-600 */
+}

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { useAuth } from '../context/AuthContext';
 import api, { SIGNALR_URL } from '../services/api';
 import { HubConnectionBuilder } from '@microsoft/signalr';
@@ -8,7 +8,9 @@ import {
   TouchSensor, 
   useSensor, 
   useSensors, 
-  DragOverlay 
+  DragOverlay,
+  pointerWithin,
+  closestCenter
 } from '@dnd-kit/core';
 import ColumnComponent from '../components/Board/Column';
 import TaskCard from '../components/Board/TaskCard';
@@ -414,18 +416,36 @@ const Dashboard = () => {
     }
   };
 
-  // --- Drag and Drop Logic ---
+
+  // Custom collision detection for Kanban:
+  //  1. First check if the POINTER is inside a task card → use that task (precise placement)
+  //  2. Then check if the POINTER is inside a column container → use that column (for empty cols)
+  //  3. Fallback to closestCenter (handles edge-of-column drags)
+  const customCollisionDetection = useCallback((args) => {
+    const pointerCollisions = pointerWithin(args);
+
+    // Find collision with a TASK (not a column container)
+    const overTask = pointerCollisions.find(
+      ({ id }) => !columns.some(c => c.id.toString() === String(id))
+    );
+    if (overTask) return [overTask];
+
+    // Find collision with a COLUMN container (e.g. empty column)
+    const overColumn = pointerCollisions.find(
+      ({ id }) => columns.some(c => c.id.toString() === String(id))
+    );
+    if (overColumn) return [overColumn];
+
+    // Fallback
+    return closestCenter(args);
+  }, [columns]);
+
   const handleDragStart = (event) => {
-    const { active } = event;
-    const activeId = active.id;
-    
+    const activeId = event.active.id; // string
     let foundTask = null;
     for (const col of columns) {
-      const t = col.tasks.find(x => x.id === activeId);
-      if (t) {
-        foundTask = t;
-        break;
-      }
+      const t = col.tasks.find(x => x.id.toString() === activeId);
+      if (t) { foundTask = t; break; }
     }
     setActiveDragTask(foundTask);
   };
@@ -438,71 +458,50 @@ const Dashboard = () => {
     const activeId = active.id;
     const overId = over.id;
 
-    // Find source column and position
+    // Find the task and its CURRENT column (after any onDragOver moves)
     let sourceCol = null;
     let draggedTask = null;
     for (const col of columns) {
-      const taskIndex = col.tasks.findIndex(t => t.id === activeId);
-      if (taskIndex !== -1) {
-        sourceCol = col;
-        draggedTask = col.tasks[taskIndex];
-        break;
-      }
+      const idx = col.tasks.findIndex(t => t.id.toString() === activeId);
+      if (idx !== -1) { sourceCol = col; draggedTask = col.tasks[idx]; break; }
     }
-
     if (!sourceCol || !draggedTask) return;
 
-    // Determine target column and target index
     let targetColId = null;
     let targetIndex = 0;
 
-    const isOverColumn = columns.some(c => c.id === overId);
-    
-    if (isOverColumn) {
-      targetColId = overId;
-      const targetCol = columns.find(c => c.id === overId);
-      targetIndex = targetCol ? targetCol.tasks.length : 0;
-      if (sourceCol.id === targetColId) {
-        targetIndex = sourceCol.tasks.length - 1;
-      }
+    const overColumn = columns.find(c => c.id.toString() === overId);
+    if (overColumn) {
+      targetColId = overColumn.id;
+      targetIndex = overColumn.id === sourceCol.id
+        ? sourceCol.tasks.findIndex(t => t.id === draggedTask.id)
+        : overColumn.tasks.length;
     } else {
-      let foundCol = null;
-      let foundIdx = -1;
       for (const col of columns) {
-        const idx = col.tasks.findIndex(t => t.id === overId);
-        if (idx !== -1) {
-          foundCol = col;
-          foundIdx = idx;
-          break;
-        }
-      }
-
-      if (foundCol) {
-        targetColId = foundCol.id;
-        targetIndex = foundIdx;
+        const idx = col.tasks.findIndex(t => t.id.toString() === overId);
+        if (idx !== -1) { targetColId = col.id; targetIndex = idx; break; }
       }
     }
 
-    if (!targetColId) return;
+    if (targetColId === null) return;
 
-    // Save previous state for rollback
+    // Apply final position in state
+    const srcIdx = sourceCol.tasks.findIndex(t => t.id === draggedTask.id);
+    if (sourceCol.id === targetColId && srcIdx === targetIndex) return;
+
     const previousColumnsState = JSON.parse(JSON.stringify(columns));
+    moveTaskInState(draggedTask.id, sourceCol.id, targetColId, targetIndex);
 
-    // Perform local Optimistic UI update immediately
-    moveTaskInState(activeId, sourceCol.id, targetColId, targetIndex);
-
-    // Call API to save to DB and trigger SignalR broadcast
     try {
-      await api.put(`/task/${activeId}/move`, {
+      await api.put(`/task/${draggedTask.id}/move`, {
         targetColumnId: targetColId,
         targetPosition: targetIndex,
-        connectionId: signalrConnectionId, // Excludes this connection from receiving the broadcast
+        connectionId: signalrConnectionId,
       });
     } catch (err) {
       console.error('Lỗi khi di chuyển thẻ công việc, đang rollback...', err);
-      // Rollback to previous state on failure
       setColumns(previousColumnsState);
-      alert(err.response?.data?.message || 'Không thể di chuyển công việc. Vui lòng kiểm tra lại quyền hạn.');
+      alert(err.response?.data?.message || 'Không thể di chuyển công việc.');
     }
   };
 
@@ -634,7 +633,8 @@ const Dashboard = () => {
             {/* DndContext wrapping Columns */}
             <DndContext 
               sensors={sensors} 
-              onDragStart={handleDragStart} 
+              collisionDetection={customCollisionDetection}
+              onDragStart={handleDragStart}
               onDragEnd={handleDragEnd}
             >
               <div className="flex-1 overflow-x-auto p-8 flex items-start gap-6 select-none">
