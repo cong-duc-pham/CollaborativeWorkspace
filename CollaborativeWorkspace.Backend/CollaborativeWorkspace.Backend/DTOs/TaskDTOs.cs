@@ -34,4 +34,15 @@ namespace CollaborativeWorkspace.Backend.DTOs
 
         public int? AssignedUserId { get; set; }
     }
+
+    public class MoveTaskRequest
+    {
+        [Required(ErrorMessage = "Cột đích là bắt buộc.")]
+        public int TargetColumnId { get; set; }
+
+        [Required(ErrorMessage = "Vị trí đích là bắt buộc.")]
+        public int TargetPosition { get; set; }
+
+        public string? ConnectionId { get; set; }
+    }
 }
