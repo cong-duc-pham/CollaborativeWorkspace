@@ -1,0 +1,39 @@
+# Visual Studio / .NET Core
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+bld/
+[Bb]in/
+[Oo]bj/
+[Log]/
+.vs/
+.vscode/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Node / React (Vite)
+node_modules/
+dist/
+dist-ssr/
+*.local
+.env
+.env.development.local
+.env.test.local
+.env.production.local
+.env.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.eslintcache
+.stylelintcache
+
+# OS-specific
+Thumbs.db
+EHthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+.DS_Store
