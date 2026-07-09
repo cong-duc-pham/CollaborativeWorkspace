@@ -49,6 +49,17 @@ namespace CollaborativeWorkspace.Backend.Filters
                     projectId = parsedId;
                 }
             }
+            else if (context.RouteData.Values.TryGetValue("columnId", out var colIdObj) && colIdObj != null)
+            {
+                if (int.TryParse(colIdObj.ToString(), out int parsedColId))
+                {
+                    var column = await _context.Columns.AsNoTracking().FirstOrDefaultAsync(c => c.Id == parsedColId);
+                    if (column != null)
+                    {
+                        projectId = column.ProjectId;
+                    }
+                }
+            }
             else if (context.RouteData.Values.TryGetValue("id", out var idObj) && idObj != null)
             {
                 if (int.TryParse(idObj.ToString(), out int parsedId))
