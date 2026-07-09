@@ -46,82 +46,105 @@ html.dark #root {
   background-color: #475569; /* slate-600 */
 }
 
-/* Fallback styles for light mode (html without .dark class) in case Tailwind config is not reloaded */
+/* Simplified clean global light mode overrides when html does not have the .dark class */
 html:not(.dark) body,
 html:not(.dark) #root,
-html:not(.dark) .dark\:bg-slate-950,
-html:not(.dark) main.dark\:bg-slate-950 {
-  background-color: #f8fafc !important; /* Slate 50 */
-  color: #0f172a !important; /* Slate 900 */
+html:not(.dark) .bg-slate-950,
+html:not(.dark) main.bg-slate-950,
+html:not(.dark) .dark\:bg-slate-950 {
+  background-color: #f8fafc !important; /* Slate 50 background */
+  color: #0f172a !important; /* Slate 900 text */
 }
 
-html:not(.dark) aside.dark\:bg-slate-950 {
-  background-color: #ffffff !important;
+/* Modals, Column containers, TaskCards */
+html:not(.dark) .bg-slate-900,
+html:not(.dark) .dark\:bg-slate-900,
+html:not(.dark) div.bg-slate-900 {
+  background-color: #ffffff !important; /* white cards */
   border-color: #e2e8f0 !important;
 }
 
-html:not(.dark) header.dark\:bg-slate-950\/30 {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
+/* Columns, Sidebars, and inline dropdown containers */
+html:not(.dark) .bg-slate-900\/40,
+html:not(.dark) .dark\:bg-slate-900\/40,
+html:not(.dark) div.bg-slate-900\/40 {
+  background-color: #f1f5f9 !important; /* column bg */
+  border-color: #cbd5e1 !important;
 }
 
-html:not(.dark) .dark\:text-white,
-html:not(.dark) h1.dark\:text-white,
-html:not(.dark) h3.dark\:text-white {
+/* Sidebar and Header backgrounds */
+html:not(.dark) aside.bg-slate-950,
+html:not(.dark) header.bg-slate-950\/30,
+html:not(.dark) .bg-slate-950\/20,
+html:not(.dark) .bg-slate-950\/40 {
+  background-color: #ffffff !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Input, Select, Textarea fields in light mode */
+html:not(.dark) input.bg-slate-950,
+html:not(.dark) select.bg-slate-950,
+html:not(.dark) textarea.bg-slate-950,
+html:not(.dark) .bg-slate-950 input,
+html:not(.dark) .bg-slate-950 select,
+html:not(.dark) .bg-slate-950 textarea {
+  background-color: #ffffff !important;
+  color: #0f172a !important;
+  border-color: #cbd5e1 !important;
+}
+
+/* Borders and dividers */
+html:not(.dark) .border-slate-900,
+html:not(.dark) .border-slate-800,
+html:not(.dark) .border-slate-800\/80,
+html:not(.dark) .border-slate-850 {
+  border-color: #cbd5e1 !important;
+}
+
+/* Text colors */
+html:not(.dark) .text-white,
+html:not(.dark) .text-slate-100,
+html:not(.dark) .text-slate-200 {
   color: #0f172a !important;
 }
 
-html:not(.dark) h4.dark\:text-slate-200,
-html:not(.dark) span.dark\:text-slate-200 {
-  color: #1e293b !important;
+html:not(.dark) label,
+html:not(.dark) .text-slate-400,
+html:not(.dark) .text-slate-500 {
+  color: #475569 !important;
 }
 
-html:not(.dark) .dark\:bg-slate-900 {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
-
-html:not(.dark) .dark\:bg-slate-900\/40,
-html:not(.dark) div.dark\:bg-slate-900\/40 {
-  background-color: #f1f5f9 !important; /* Column bg in light mode */
+/* Buttons */
+html:not(.dark) button[type="button"],
+html:not(.dark) button.text-slate-500 {
+  color: #64748b !important;
   border-color: #cbd5e1 !important;
 }
 
-/* For empty placeholder column and buttons */
-html:not(.dark) .dark\:border-slate-900,
-html:not(.dark) .dark\:border-slate-800,
-html:not(.dark) .dark\:border-slate-800\/80,
-html:not(.dark) .dark\:hover\:border-slate-800,
-html:not(.dark) .dark\:hover\:border-slate-700\/80 {
-  border-color: #cbd5e1 !important;
-}
-
-html:not(.dark) .dark\:bg-purple-600\/10 {
-  background-color: #f3e8ff !important;
-  color: #7e22ce !important;
-}
-
-html:not(.dark) .dark\:bg-slate-950\/40,
-html:not(.dark) .dark\:bg-slate-950\/60,
-html:not(.dark) .dark\:bg-slate-950\/20 {
+html:not(.dark) button[type="button"]:hover,
+html:not(.dark) button.text-slate-500:hover {
+  color: #0f172a !important;
   background-color: #f1f5f9 !important;
+}
+
+html:not(.dark) .bg-slate-950\/60 {
+  background-color: #f8fafc !important;
   border-color: #e2e8f0 !important;
 }
 
-html:not(.dark) .dark\:text-slate-400,
-html:not(.dark) .dark\:text-slate-500 {
+html:not(.dark) .bg-red-500\/5 {
+  background-color: #fef2f2 !important;
+  border-color: #fca5a5 !important;
+}
+
+html:not(.dark) button.border-dashed.border-slate-900 {
+  border-color: #cbd5e1 !important;
   color: #64748b !important;
 }
 
-/* Modals input fields */
-html:not(.dark) .dark\:bg-slate-950 {
-  background-color: #ffffff !important;
+html:not(.dark) button.border-dashed.border-slate-900:hover {
+  background-color: #f1f5f9 !important;
   color: #0f172a !important;
-  border-color: #cbd5e1 !important;
 }
 
-html:not(.dark) .dark\:bg-slate-900 {
-  background-color: #ffffff !important;
-  border-color: #e2e8f0 !important;
-}
 
