@@ -61,7 +61,20 @@ html:not(.dark) .bg-slate-900,
 html:not(.dark) .dark\:bg-slate-900,
 html:not(.dark) div.bg-slate-900 {
   background-color: #ffffff !important; /* white cards */
+}
+
+/* Modals, Column containers border (excluding border-l-4 priority cards) */
+html:not(.dark) .bg-slate-900:not(.border-l-4),
+html:not(.dark) div.bg-slate-900:not(.border-l-4) {
   border-color: #e2e8f0 !important;
+}
+
+/* TaskCards border with left border preservation */
+html:not(.dark) .bg-slate-900.border-l-4,
+html:not(.dark) div.bg-slate-900.border-l-4 {
+  border-top-color: #e2e8f0 !important;
+  border-right-color: #e2e8f0 !important;
+  border-bottom-color: #e2e8f0 !important;
 }
 
 /* Columns, Sidebars, and inline dropdown containers */
@@ -93,12 +106,21 @@ html:not(.dark) .bg-slate-950 textarea {
   border-color: #cbd5e1 !important;
 }
 
-/* Borders and dividers */
-html:not(.dark) .border-slate-900,
-html:not(.dark) .border-slate-800,
-html:not(.dark) .border-slate-800\/80,
-html:not(.dark) .border-slate-850 {
+/* Borders and dividers (excluding priority left borders on task cards) */
+html:not(.dark) .border-slate-900:not(.border-l-4),
+html:not(.dark) .border-slate-800:not(.border-l-4),
+html:not(.dark) .border-slate-800\/80:not(.border-l-4),
+html:not(.dark) .border-slate-850:not(.border-l-4) {
   border-color: #cbd5e1 !important;
+}
+
+html:not(.dark) .border-slate-900.border-l-4,
+html:not(.dark) .border-slate-800.border-l-4,
+html:not(.dark) .border-slate-800\/80.border-l-4,
+html:not(.dark) .border-slate-850.border-l-4 {
+  border-top-color: #cbd5e1 !important;
+  border-right-color: #cbd5e1 !important;
+  border-bottom-color: #cbd5e1 !important;
 }
 
 /* Text colors */

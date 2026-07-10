@@ -50,7 +50,7 @@ const Register = () => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-slate-950 px-4 py-12 sm:px-6 lg:px-8">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 dark:bg-slate-950 px-4 py-12 sm:px-6 lg:px-8 transition-colors duration-250 relative">
       {/* Background blobs for premium lighting effect */}
       <div className="absolute top-1/4 left-1/4 h-72 w-72 rounded-full bg-purple-500/10 blur-[100px] pointer-events-none"></div>
       <div className="absolute bottom-1/4 right-1/4 h-72 w-72 rounded-full bg-indigo-500/10 blur-[100px] pointer-events-none"></div>
@@ -60,15 +60,15 @@ const Register = () => {
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 shadow-lg shadow-purple-500/30">
             <LayoutDashboard className="h-6 w-6 text-white" />
           </div>
-          <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-white">
+          <h2 className="mt-6 text-center text-3xl font-extrabold tracking-tight text-slate-900 dark:text-white">
             Tạo tài khoản mới
           </h2>
-          <p className="mt-2 text-center text-sm text-slate-400">
+          <p className="mt-2 text-center text-sm text-slate-500 dark:text-slate-400">
             Bắt đầu thiết lập không gian cộng tác của bạn
           </p>
         </div>
 
-        <div className="rounded-2xl border border-slate-800 bg-slate-900/60 p-8 backdrop-blur-xl shadow-xl shadow-black/40">
+        <div className="rounded-2xl border border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-slate-900/60 p-8 backdrop-blur-xl shadow-xl shadow-slate-200/50 dark:shadow-black/40">
           <form className="space-y-5" onSubmit={handleSubmit}>
             {error && (
               <div className="rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-sm text-red-400">
@@ -83,7 +83,7 @@ const Register = () => {
             )}
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Họ và Tên
               </label>
               <div className="relative rounded-lg shadow-sm">
@@ -95,14 +95,14 @@ const Register = () => {
                   required
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
-                  className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 py-3 pl-10 pr-3 text-slate-200 placeholder-slate-500 outline-none ring-1 ring-transparent transition-all focus:border-purple-500 focus:ring-purple-500/30 text-sm"
+                  className="block w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 py-3 pl-10 pr-3 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 outline-none ring-1 ring-transparent transition-all focus:border-purple-500 focus:ring-purple-500/30 text-sm"
                   placeholder="Nguyễn Văn A"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Địa chỉ Email
               </label>
               <div className="relative rounded-lg shadow-sm">
@@ -114,14 +114,14 @@ const Register = () => {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 py-3 pl-10 pr-3 text-slate-200 placeholder-slate-500 outline-none ring-1 ring-transparent transition-all focus:border-purple-500 focus:ring-purple-500/30 text-sm"
+                  className="block w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 py-3 pl-10 pr-3 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 outline-none ring-1 ring-transparent transition-all focus:border-purple-500 focus:ring-purple-500/30 text-sm"
                   placeholder="name@company.com"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Mật khẩu
               </label>
               <div className="relative rounded-lg shadow-sm">
@@ -133,14 +133,14 @@ const Register = () => {
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 py-3 pl-10 pr-3 text-slate-200 placeholder-slate-500 outline-none ring-1 ring-transparent transition-all focus:border-purple-500 focus:ring-purple-500/30 text-sm"
+                  className="block w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 py-3 pl-10 pr-3 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 outline-none ring-1 ring-transparent transition-all focus:border-purple-500 focus:ring-purple-500/30 text-sm"
                   placeholder="Tối thiểu 6 ký tự"
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label className="text-xs font-semibold uppercase tracking-wider text-slate-400">
+              <label className="text-xs font-semibold uppercase tracking-wider text-slate-500 dark:text-slate-400">
                 Xác nhận mật khẩu
               </label>
               <div className="relative rounded-lg shadow-sm">
@@ -152,7 +152,7 @@ const Register = () => {
                   required
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
-                  className="block w-full rounded-lg border border-slate-800 bg-slate-950/80 py-3 pl-10 pr-3 text-slate-200 placeholder-slate-500 outline-none ring-1 ring-transparent transition-all focus:border-purple-500 focus:ring-purple-500/30 text-sm"
+                  className="block w-full rounded-lg border border-slate-200 dark:border-slate-800 bg-slate-50/80 dark:bg-slate-950/80 py-3 pl-10 pr-3 text-slate-900 dark:text-slate-200 placeholder-slate-400 dark:placeholder-slate-500 outline-none ring-1 ring-transparent transition-all focus:border-purple-500 focus:ring-purple-500/30 text-sm"
                   placeholder="Nhập lại mật khẩu"
                 />
               </div>
@@ -175,9 +175,9 @@ const Register = () => {
             </div>
           </form>
 
-          <div className="mt-6 text-center text-sm text-slate-400">
+          <div className="mt-6 text-center text-sm text-slate-500 dark:text-slate-400">
             Đã có tài khoản?{' '}
-            <Link to="/login" className="font-semibold text-purple-400 hover:text-purple-300 transition-colors">
+            <Link to="/login" className="font-semibold text-purple-600 dark:text-purple-400 hover:text-purple-500 dark:hover:text-purple-300 transition-colors">
               Đăng nhập ngay
             </Link>
           </div>
